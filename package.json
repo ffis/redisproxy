@@ -1,0 +1,20 @@
+{
+  "name": "redisproxy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "redis",
+    "proxy"
+  ],
+  "author": "Loksly",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.15.2",
+    "expressjs": "^1.0.1",
+    "redis": "^2.7.1"
+  }
+}

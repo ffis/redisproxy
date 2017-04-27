@@ -1,0 +1,8 @@
+{
+	"port": 10000,
+	"redis": {
+		"host": "localhost",
+		"port": 6379,
+		"no_ready_check": true
+	}
+}
