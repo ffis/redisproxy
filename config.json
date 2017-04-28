@@ -1,8 +1,17 @@
 {
-	"port": 10000,
 	"redis": {
 		"host": "localhost",
 		"port": 6379,
 		"no_ready_check": true
+	},
+	"server": {
+		"port": 4430,
+		"https": false,
+		"options": {
+			"key": "privatekey.pem",
+			"cert": "cert.pem",
+			"passphrase": ""
+		}
 	}
 }
+	
