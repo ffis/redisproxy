@@ -1,4 +1,5 @@
 (function(){
+	'use strict';
 
 	const express = require('express'),
 		redis = require('redis'),

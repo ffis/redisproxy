@@ -13,8 +13,10 @@
   "author": "Loksly",
   "license": "MIT",
   "dependencies": {
+    "bloom.js": "^0.1.1",
     "express": "^4.15.2",
     "expressjs": "^1.0.1",
-    "redis": "^2.7.1"
+    "redis": "^2.7.1",
+    "socket.io": "^2.0.1"
   }
 }
