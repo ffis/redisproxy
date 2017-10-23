@@ -5,13 +5,21 @@
 		"no_ready_check": true
 	},
 	"server": {
-		"port": 4430,
+		"port": 8080,
 		"https": false,
 		"options": {
 			"key": "privatekey.pem",
 			"cert": "cert.pem",
 			"passphrase": ""
 		}
+	},
+	"cas": {
+		"base_url": "",
+		"service": ""
+	},
+	"jwt": {
+		"secret": "",
+		"session_time": 600000
 	}
 }
 	
