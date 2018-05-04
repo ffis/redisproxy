@@ -13,13 +13,6 @@
 			"passphrase": ""
 		}
 	},
-	"cas": {
-		"base_url": "",
-		"service": ""
-	},
-	"jwt": {
-		"secret": "",
-		"session_time": 600000
-	}
+	"debug": false
 }
 	

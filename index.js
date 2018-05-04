@@ -4,12 +4,12 @@
 	const express = require('express'),
 		redis = require('redis'),
 		url = require('url'),
+		compression = require('compression'),
 		BloomFilter = require('bloom.js'),
-		CAS = require('cas'),
-		jsonwebtoken = require('jsonwebtoken'),
 		config = require('./config.json'),
-		app = express(),
-		cas = new CAS(config.cas);
+		app = express();
+
+	app.use(compression());
 
 	const clients = [];
 
@@ -31,7 +31,7 @@
 				});
 			}
 
-			return cb ? cb(err) : true;
+			return cb ? cb(err, vals) : true;
 		});
 	}
 
@@ -44,52 +44,51 @@
 		Reflect.deleteProperty(config.redis.password);
 	}
 
-	app.use('/authenticate', function(req, res){
-		if (typeof req.query.ticket === 'string' && req.query.ticket !== ''){
-			cas.validate(data.ticket, function(err, status, username){
-				if (err){
-					res.status(400);
-
-					return;
+	function sendCb(res){
+		return function(err, val){
+			if (err){
+				res.status(500).jsonp('Error!');
+			} else if (val){
+				if (typeof val === 'string'){
+					try{
+						var obj = JSON.parse(val);
+						res.jsonp(obj);
+					}catch(e){
+						res.jsonp(val);
+					}
+				} else {
+					res.jsonp(val);
 				}
-				const token = jsonwebtoken.sign({username: username}, config.jwt.secret, {'expiresIn': config.jwt.session_time});
-
-				res.jsonp({token: token});
-			});
-		} else {
-			res.status(400);
+			} else {
+				res.status(404).jsonp('Not found!');
+			}
 		}
-	});
+	}
 
 	app.get('*', function(req, res){
 		const key = url.parse(req.url).pathname;
 
-		if (filter.contains(key)){
-			redisclient.get(key, function(err, val){
+		if (key === '/api' && config.server.expose){
+			refreshbloom(function(err, keys){
 				if (err){
-					res.status(500);
-				} else if (val){
-
-					res.jsonp(val);
+					console.error(err);
+					res.status(500).send('Error');
 				} else {
-					res.status(404);
+					res.jsonp(keys);
 				}
 			});
+			
+			return;
+		}
+
+		if (filter.contains(key)){
+			redisclient.get(key, sendCb(res));
 		} else {
 			refreshbloom(function(){
 				if (filter.contains(key)){
-					redisclient.get(key, function(erro, val){
-						if (erro){
-							res.status(500);
-						} else if (val){
-
-							res.jsonp(val);
-						} else {
-							res.status(404);
-						}
-					});
+					redisclient.get(key, sendCb(res));
 				} else {
-					res.status(404);
+					res.status(404).jsonp('Not found');
 				}
 			});
 		}
@@ -109,35 +108,28 @@
 	} else {
 		server = require('http').createServer(app);
 	}
+
 	const io = require('socket.io')(server);
 	
 	io.on('connection', function(client){
-		
 		logger.log('Added client', clients.length);
-
 		client.on('event', function(data){
 			logger.log(data);
-			cas.validate(data.ticket, function(err, status, username){
-				if (err){
-					logger.log(data, err);
-				} else {
-					logger.log(data, status, username);
-					clients.push(client);
-				}
-			});
+			clients.push(client);
 		});
 		client.on('disconnect', function(){
 			const index = clients.indexOf(client);
 			if (index > -1){
 				clients.splice(index, 1);
 			}
-			logger.log('removed client', clients.length);
+			logger.log('removed client. Now we have', clients.length, 'clients');
 		});
 	});
 
 	redissubs.subscribe('updates', function(evt){
 		logger.log(evt);
 	});
+
 	redissubs.on('message', function (channel, data) {
 		logger.log(channel, data);
 		clients.forEach(function(socket){
@@ -145,8 +137,6 @@
 		});
 	});
 
-
 	server.listen(config.server.port);
-
 
 })(console);
