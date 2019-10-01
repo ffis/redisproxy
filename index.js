@@ -1,3 +1,4 @@
+/* eslint-disable no-sync */
 (function(logger){
 	'use strict';
 
@@ -6,6 +7,7 @@
 		url = require('url'),
 		compression = require('compression'),
 		BloomFilter = require('bloom.js'),
+		JWTDecoder = require('./jwtdecoder'),
 		config = require('./config.json'),
 		app = express();
 
@@ -50,10 +52,10 @@
 				res.status(500).jsonp('Error!');
 			} else if (val){
 				if (typeof val === 'string'){
-					try{
+					try {
 						var obj = JSON.parse(val);
 						res.jsonp(obj);
-					}catch(e){
+					} catch (e){
 						res.jsonp(val);
 					}
 				} else {
@@ -62,15 +64,20 @@
 			} else {
 				res.status(404).jsonp('Not found!');
 			}
-		}
+		};
 	}
+
+
+	const jwtdecoder = new JWTDecoder(config.jwtdecoder);
+
+	jwtdecoder.register(app);
 
 	app.get('*', function(req, res){
 		const key = url.parse(req.url).pathname;
 
-		if (key === '/api' && config.server.expose){
+		if (key === '/api' && config.server.expose) {
 			refreshbloom(function(err, keys){
-				if (err){
+				if (err) {
 					console.error(err);
 					res.status(500).send('Error');
 				} else {
@@ -81,7 +88,7 @@
 			return;
 		}
 
-		if (filter.contains(key)){
+		if (filter.contains(key)) {
 			redisclient.get(key, sendCb(res));
 		} else {
 			refreshbloom(function(){
@@ -97,7 +104,7 @@
 
 	let server = false;
 
-	if (config.server.https){
+	if (config.server.https) {
 		const https = require('https'),
 			fs = require('fs');
 		config.server.options.key = fs.readFileSync(config.server.options.key);
@@ -137,6 +144,6 @@
 		});
 	});
 
-	server.listen(config.server.port);
+	server.listen(config.server.port, config.server.bind);
 
 })(console);

@@ -6,6 +6,7 @@
 	},
 	"server": {
 		"port": 8080,
+		"bind": "127.0.0.1",
 		"https": false,
 		"options": {
 			"key": "privatekey.pem",
@@ -13,6 +14,11 @@
 			"passphrase": ""
 		}
 	},
+	"jwtdecoder": {
+        "secret": "12345678901234567890",
+        "format": "base64",
+        "notify": "http://localhost:1304/api/0/users/:username/log"
+    },
 	"debug": false
 }
 	
