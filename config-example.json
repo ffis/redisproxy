@@ -19,6 +19,9 @@
         "format": "base64",
         "notify": "http://localhost:1304/api/0/users/:username/log"
     },
-	"debug": false
+	"debug": false,
+	"restproxyplugins": [
+		"compression", "jwt", "api"
+	]
 }
 	
