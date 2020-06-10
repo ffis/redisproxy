@@ -1,16 +1,15 @@
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { createClient, RedisClient } from "redis";
-import { Application, Request, Response } from "express";
+import { Application } from "express";
 
-import { getServer, sendCb } from "./utils";
+import { getServer } from "./utils";
 
 import { promisify } from "util";
 import { buildPlugins, RestProxyPlugin } from "./plugins";
 import { Server } from "http";
 
 const express = require("express"),
-	url = require("url"),
 	BloomFilter = require("bloom.js");
 
 export class App {
@@ -24,6 +23,11 @@ export class App {
 	private plugins: RestProxyPlugin[];
 
 	constructor(private config: any) {
+
+		if (!config.restproxyplugins) {
+			throw new Error("You need to enable at least one plugin. Try editing config.json file and add plugin: [\"redisproxy\"]");
+		}
+
 		this.app = express();
 		this.server = getServer(this.config, this.app);
 		this.filter = new BloomFilter();
@@ -43,7 +47,11 @@ export class App {
 		});
 	}
 
-	private refresh(): Promise<string[]> {
+	public isValid(key: string): boolean {
+		return this.filter.contains(key);
+	}
+
+	public refresh(): Promise<string[]> {
 		return this.keys("*").then((vals) => {
 			this.filter = new BloomFilter();
 			vals.forEach((value) => {
@@ -63,25 +71,8 @@ export class App {
 	public register(): Promise<void> {
 
 		return this.ready().then(() => {
-		
 			this.plugins.forEach((plugin) => {
 				plugin.register(this);
-			})
-
-			this.app.get("*", (req: Request, res: Response) => {
-				const key = url.parse(req.url).pathname;
-			
-				if (this.filter.contains(key)) {
-					this.redisclient.get(key, sendCb(res));
-				} else {
-					this.refresh().then(() => {
-						if (this.filter.contains(key)) {
-							this.redisclient.get(key, sendCb(res));
-						} else {
-							res.status(404).jsonp("Not found");
-						}
-					});
-				}
 			});
 		});
 	}

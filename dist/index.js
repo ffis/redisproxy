@@ -7,11 +7,14 @@ var redis_1 = require("redis");
 var utils_1 = require("./utils");
 var util_1 = require("util");
 var plugins_1 = require("./plugins");
-var express = require("express"), url = require("url"), BloomFilter = require("bloom.js");
+var express = require("express"), BloomFilter = require("bloom.js");
 var App = /** @class */ (function () {
     function App(config) {
         var _this = this;
         this.config = config;
+        if (!config.restproxyplugins) {
+            throw new Error("You need to enable at least one plugin. Try editing config.json file and add plugin: [\"redisproxy\"]");
+        }
         this.app = express();
         this.server = utils_1.getServer(this.config, this.app);
         this.filter = new BloomFilter();
@@ -27,6 +30,9 @@ var App = /** @class */ (function () {
             _this.keys = util_1.promisify(_this.redisclient.keys).bind(_this.redisclient);
         });
     }
+    App.prototype.isValid = function (key) {
+        return this.filter.contains(key);
+    };
     App.prototype.refresh = function () {
         var _this = this;
         return this.keys("*").then(function (vals) {
@@ -47,22 +53,6 @@ var App = /** @class */ (function () {
         return this.ready().then(function () {
             _this.plugins.forEach(function (plugin) {
                 plugin.register(_this);
-            });
-            _this.app.get("*", function (req, res) {
-                var key = url.parse(req.url).pathname;
-                if (_this.filter.contains(key)) {
-                    _this.redisclient.get(key, utils_1.sendCb(res));
-                }
-                else {
-                    _this.refresh().then(function () {
-                        if (_this.filter.contains(key)) {
-                            _this.redisclient.get(key, utils_1.sendCb(res));
-                        }
-                        else {
-                            res.status(404).jsonp("Not found");
-                        }
-                    });
-                }
             });
         });
     };

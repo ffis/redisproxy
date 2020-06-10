@@ -51,6 +51,15 @@ describe("should work without plugins", function () {
     });
 });
 describe("Should work as expected", function () {
+    it("should throw error when running without a plugin", function () {
+        var notValidConfig = Object.assign({}, config);
+        Reflect.deleteProperty(notValidConfig, "restproxyplugins");
+        expect(function () {
+            var app = new __1.App(notValidConfig);
+        }).toThrow();
+    });
+});
+describe("Should work as expected", function () {
     beforeEach(function () {
         var configWithJWTPlugin = Object.assign({}, config, { restproxyplugins: ["api"] });
         var app = new __1.App(configWithJWTPlugin);
@@ -128,6 +137,38 @@ describe("Should work as expected", function () {
             .end(function (err) {
             if (err)
                 throw err;
+        });
+    });
+});
+describe("Should work as expected", function () {
+    beforeEach(function () {
+        var configWithRPlugin = Object.assign({}, config, { restproxyplugins: ["redisproxy"] });
+        var app = new __1.App(configWithRPlugin);
+        return app.register().then(function () {
+            _this.app = app;
+        });
+    });
+    it("should return ok when asking for valid content", function (done) {
+        _this.app.refresh().then(function (validurls) {
+            if (validurls.length > 0) {
+                var validurl = validurls[0];
+                var url = validurl.startsWith("/") ? validurl : "/" + validurl;
+                request(_this.app.app)
+                    .get(url)
+                    .set('Accept', 'application/json')
+                    .expect('Content-Type', /json/)
+                    .expect(function (res) {
+                    expect(res.status).toBe(200);
+                    done();
+                })
+                    .end(function (err) {
+                    if (err)
+                        throw err;
+                });
+            }
+            else {
+                done();
+            }
         });
     });
 });
