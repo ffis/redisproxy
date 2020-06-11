@@ -9,19 +9,31 @@ export interface RestProxyPlugin {
 
 export function buildPlugins(config): RestProxyPlugin[] {
     const restproxyplugins = config.restproxyplugins;
-    const plugins = restproxyplugins.map((plugin) => {
-        const path = resolve(__dirname, plugin);
-        let p;
+    const pluginsInstances: RestProxyPlugin[] = restproxyplugins.map((plugin) => {
+        const pluginName = Array.isArray(plugin) ? plugin[0] : plugin;
+        const pluginConfig = Array.isArray(plugin) ? plugin[1] : null;
+        const path = resolve(__dirname, pluginName);
+
+        let lib;
         try {
-            p = require(path);
+            lib = require(path);
         } catch (err) {
-            p = require(plugin);
+            lib = require(plugin);
         }
 
-        return p;
+        const constructor = lib.default ? lib.default : lib;
+        let instance;
+        try {
+            instance = new constructor(pluginConfig);
+        } catch (err) {
+            console.error("Cannot instance plugin", pluginName, "check it's availability or parameters", "\n\tParameters:", pluginConfig);
+
+            throw err;
+        }
+
+        return instance;
     });
 
-    const pluginsInstances: RestProxyPlugin[] = plugins.map((plugin) => plugin.default ? new plugin.default(config) : new plugin(config));
 
     return pluginsInstances;
 }

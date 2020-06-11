@@ -26,14 +26,13 @@ function sendCb(res) {
     };
 }
 var RedisProxyPlugin = /** @class */ (function () {
-    function RedisProxyPlugin(config) {
-        this.config = config;
+    function RedisProxyPlugin() {
     }
     RedisProxyPlugin.prototype.ready = function () {
         return Promise.resolve();
     };
     RedisProxyPlugin.prototype.register = function (app) {
-        app.app.get("*", function (req, res) {
+        app.app.get("*", function (req, res, next) {
             var key = url_1.parse(req.url).pathname;
             if (app.isValid(key)) {
                 app.redisclient.get(key, sendCb(res));
@@ -44,7 +43,7 @@ var RedisProxyPlugin = /** @class */ (function () {
                         app.redisclient.get(key, sendCb(res));
                     }
                     else {
-                        res.status(404).jsonp("Not found");
+                        next();
                     }
                 });
             }

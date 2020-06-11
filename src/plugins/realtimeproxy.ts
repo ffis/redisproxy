@@ -13,7 +13,6 @@ export default class RealTimeProxyPlugin implements RestProxyPlugin {
     }
 
     register(app: App): Promise<void> { 
-
         const sourceBuilder = () => {
             const redissub: RedisClient = createClient(this.config.redis);
             return new RedisRTEventsSource(redissub);

@@ -12,19 +12,17 @@ export default class ApiPlugin implements RestProxyPlugin {
     }
 
     register(app: App): Promise<void> {
-        if (this.config.server.expose) {
-            const keys = promisify(app.redisclient.keys).bind(app.redisclient);
+        const keys = promisify(app.redisclient.keys).bind(app.redisclient);
 
-			app.app.get("/api", (req: Request, res: Response) => {
-				keys("*").then((keys) => {
-					res.jsonp(keys);
-				}).catch((err) => {
-					console.error(err);
-					res.status(500).send("Error");
-				});
-			});
-        }
-        
+        app.app.get("/api", (req: Request, res: Response) => {
+            keys("*").then((keys) => {
+                res.jsonp(keys);
+            }).catch((err) => {
+                console.error(err);
+                res.status(500).send("Error");
+            });
+        });
+
         return Promise.resolve();
     }
 }

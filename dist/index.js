@@ -4,10 +4,11 @@ exports.run = exports.App = void 0;
 var fs_1 = require("fs");
 var path_1 = require("path");
 var redis_1 = require("redis");
+var express = require("express");
 var utils_1 = require("./utils");
 var util_1 = require("util");
 var plugins_1 = require("./plugins");
-var express = require("express"), BloomFilter = require("bloom.js");
+var BloomFilter = require("bloom.js");
 var App = /** @class */ (function () {
     function App(config) {
         var _this = this;
@@ -16,7 +17,6 @@ var App = /** @class */ (function () {
             throw new Error("You need to enable at least one plugin. Try editing config.json file and add plugin: [\"redisproxy\"]");
         }
         this.app = express();
-        this.server = utils_1.getServer(this.config, this.app);
         this.filter = new BloomFilter();
         this.redisclient = redis_1.createClient(config.redis);
         this.readyP = new Promise(function (resolve, reject) {
@@ -58,6 +58,10 @@ var App = /** @class */ (function () {
     };
     App.prototype.listen = function () {
         var _this = this;
+        if (!this.config.server || !this.config.server.port || !this.config.server.bind) {
+            throw new Error("No valid config for server has been set");
+        }
+        this.server = utils_1.getServer(this.config, this.app);
         this.server.listen(this.config.server.port, this.config.server.bind, function () {
             var protocol = _this.config.server.https ? "https" : "http";
             console.log("Listening on", protocol + "://" + _this.config.server.bind + ":" + _this.config.server.port);

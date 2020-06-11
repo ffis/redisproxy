@@ -2,15 +2,16 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 import { createClient, RedisClient } from "redis";
 import { Application } from "express";
+import * as express from "express";
 
 import { getServer } from "./utils";
 
 import { promisify } from "util";
 import { buildPlugins, RestProxyPlugin } from "./plugins";
 import { Server } from "http";
+import { IConfig } from "./config";
 
-const express = require("express"),
-	BloomFilter = require("bloom.js");
+import * as BloomFilter from "bloom.js";
 
 export class App {
 	public app: Application;
@@ -22,14 +23,14 @@ export class App {
 	private readyP: Promise<void>;
 	private plugins: RestProxyPlugin[];
 
-	constructor(private config: any) {
+	constructor(private config: IConfig) {
 
 		if (!config.restproxyplugins) {
 			throw new Error("You need to enable at least one plugin. Try editing config.json file and add plugin: [\"redisproxy\"]");
 		}
 
 		this.app = express();
-		this.server = getServer(this.config, this.app);
+
 		this.filter = new BloomFilter();
 		
 		this.redisclient = createClient(config.redis);
@@ -78,6 +79,11 @@ export class App {
 	}
 
 	public listen() {
+		if (!this.config.server || !this.config.server.port || !this.config.server.bind) {
+			throw new Error("No valid config for server has been set");
+		}
+		this.server = getServer(this.config, this.app);
+
 		this.server.listen(this.config.server.port, this.config.server.bind, () => {
 			const protocol = this.config.server.https ? "https" : "http";
 			console.log("Listening on", protocol + "://" + this.config.server.bind + ":" + this.config.server.port);

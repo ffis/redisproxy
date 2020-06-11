@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.1.0] - 2020-06-11
+
+### Added
+- Added _static_ plugin
+
+### Modified
+- _redisproxy_ is now a plugin so it can be enable and disable.
+- _notify_ is a separate plugin
+- Parameters for plugins are now specified as an array. Check [`IConfig` interface](./src/config.ts) and `spec/plugins/jwt.spec.ts` as reference.
+
 ## [2.0.0] - 2020-06-08
 
 ### Added

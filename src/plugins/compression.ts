@@ -3,8 +3,8 @@ import compression = require("compression");
 import { RestProxyPlugin } from ".";
 import { App } from "..";
 
-export default class JWTPlugin implements RestProxyPlugin {
-    constructor(private config) { }
+export default class CompressionPlugin implements RestProxyPlugin {
+    constructor() { }
 
     ready(): Promise<void> {
         return Promise.resolve();

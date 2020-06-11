@@ -1,6 +1,6 @@
 {
   "name": "redisproxy",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "This is a simple redis proxy intented to server a jsonp access or an socket-io real time proxy",
   "main": "dist/index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "test": "node -r source-map-support/register ./node_modules/jasmine/bin/jasmine.js --config=./src/spec/support/jasmine.json",
     "tsc": "./node_modules/typescript/bin/tsc",
     "watch": "./node_modules/nodemon/bin/nodemon.js -w src --ext ts --exec 'npm run build && npm test'",
-    "run": "node dist"
+    "start": "node dist"
   },
   "keywords": [
     "redis",
@@ -22,6 +22,7 @@
     "compression": "^1.7.4",
     "express": "^4.17.1",
     "jwt-simple": "^0.5.6",
+    "portfinder": "^1.0.26",
     "redis": "^3.0.2",
     "socket.io": "^2.3.0",
     "tiny-json-http": "^7.2.0"
@@ -31,6 +32,7 @@
     "@types/jasmine": "^3.5.10",
     "@types/node": "^14.0.13",
     "@types/redis": "^2.8.22",
+    "@types/serve-static": "^1.13.4",
     "@types/socket.io": "^2.1.8",
     "jasmine": "^3.5.0",
     "nodemon": "^2.0.4",

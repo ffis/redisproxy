@@ -1,18 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var compression = require("compression");
-var JWTPlugin = /** @class */ (function () {
-    function JWTPlugin(config) {
-        this.config = config;
+var CompressionPlugin = /** @class */ (function () {
+    function CompressionPlugin() {
     }
-    JWTPlugin.prototype.ready = function () {
+    CompressionPlugin.prototype.ready = function () {
         return Promise.resolve();
     };
-    JWTPlugin.prototype.register = function (app) {
+    CompressionPlugin.prototype.register = function (app) {
         app.app.use(compression());
         return Promise.resolve();
     };
-    return JWTPlugin;
+    return CompressionPlugin;
 }());
-exports.default = JWTPlugin;
+exports.default = CompressionPlugin;
 //# sourceMappingURL=compression.js.map

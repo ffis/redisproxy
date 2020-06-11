@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { parse } from "url";
 
 import { RestProxyPlugin } from ".";
@@ -26,14 +26,14 @@ function sendCb(res: Response) {
 }
 
 export default class RedisProxyPlugin implements RestProxyPlugin {
-    constructor(private config) { }
+    constructor() { }
 
     ready(): Promise<void> {
         return Promise.resolve();
     }
 
     register(app: App): Promise<void> {
-        app.app.get("*", (req: Request, res: Response) => {
+        app.app.get("*", (req: Request, res: Response, next: NextFunction) => {
             const key = parse(req.url).pathname;
         
             if (app.isValid(key)) {
@@ -43,7 +43,7 @@ export default class RedisProxyPlugin implements RestProxyPlugin {
                     if (app.isValid(key)) {
                         app.redisclient.get(key, sendCb(res));
                     } else {
-                        res.status(404).jsonp("Not found");
+                        next();
                     }
                 });
             }

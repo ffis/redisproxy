@@ -4,18 +4,28 @@ exports.buildPlugins = void 0;
 var path_1 = require("path");
 function buildPlugins(config) {
     var restproxyplugins = config.restproxyplugins;
-    var plugins = restproxyplugins.map(function (plugin) {
-        var path = path_1.resolve(__dirname, plugin);
-        var p;
+    var pluginsInstances = restproxyplugins.map(function (plugin) {
+        var pluginName = Array.isArray(plugin) ? plugin[0] : plugin;
+        var pluginConfig = Array.isArray(plugin) ? plugin[1] : null;
+        var path = path_1.resolve(__dirname, pluginName);
+        var lib;
         try {
-            p = require(path);
+            lib = require(path);
         }
         catch (err) {
-            p = require(plugin);
+            lib = require(plugin);
         }
-        return p;
+        var constructor = lib.default ? lib.default : lib;
+        var instance;
+        try {
+            instance = new constructor(pluginConfig);
+        }
+        catch (err) {
+            console.error("Cannot instance plugin", pluginName, "check it's availability or parameters", "\n\tParameters:", pluginConfig);
+            throw err;
+        }
+        return instance;
     });
-    var pluginsInstances = plugins.map(function (plugin) { return plugin.default ? new plugin.default(config) : new plugin(config); });
     return pluginsInstances;
 }
 exports.buildPlugins = buildPlugins;

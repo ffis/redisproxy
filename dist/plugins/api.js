@@ -9,17 +9,15 @@ var ApiPlugin = /** @class */ (function () {
         return Promise.resolve();
     };
     ApiPlugin.prototype.register = function (app) {
-        if (this.config.server.expose) {
-            var keys_1 = util_1.promisify(app.redisclient.keys).bind(app.redisclient);
-            app.app.get("/api", function (req, res) {
-                keys_1("*").then(function (keys) {
-                    res.jsonp(keys);
-                }).catch(function (err) {
-                    console.error(err);
-                    res.status(500).send("Error");
-                });
+        var keys = util_1.promisify(app.redisclient.keys).bind(app.redisclient);
+        app.app.get("/api", function (req, res) {
+            keys("*").then(function (keys) {
+                res.jsonp(keys);
+            }).catch(function (err) {
+                console.error(err);
+                res.status(500).send("Error");
             });
-        }
+        });
         return Promise.resolve();
     };
     return ApiPlugin;
