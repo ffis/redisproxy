@@ -13,7 +13,8 @@ describe("Should work as expected", function () {
         return portfinder.getPortPromise().then(function (port) {
             var url = "http://localhost:" + port;
             _this.port = port;
-            var configWithNotifyPlugin = Object.assign({}, config, { restproxyplugins: [["notify", { url: url }]] });
+            var options = { url: url, MAX_CONTENT_LENGTH: 2 };
+            var configWithNotifyPlugin = Object.assign({}, config, { restproxyplugins: [["notify", options]] });
             var app = new __1.App(configWithNotifyPlugin);
             return app.register().then(function () {
                 _this.app = app.app;
@@ -31,10 +32,21 @@ describe("Should work as expected", function () {
         var url = "/";
         request(_this.app)
             .get(url)
-            .end(function (err) {
-            if (err)
-                throw err;
-        });
+            .end(function () { });
+    });
+    it("should notify when no body for /", function (done) {
+        var server = http_1.createServer(function (req, res) {
+            res.writeHead(201);
+            res.end();
+            expect(req.method).toBe("POST");
+            server.close();
+            done();
+        }).listen(_this.port);
+        var url = "/";
+        request(_this.app)
+            .post(url)
+            .send({ "close": "example" })
+            .end(function () { });
     });
 });
 //# sourceMappingURL=notify.spec.js.map

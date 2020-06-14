@@ -2,13 +2,14 @@ import request = require("supertest");
 import { App } from "../../..";
 
 import * as jwt from "jwt-simple";
-import JWTPlugin from "../../../plugins/jwt";
+import JWTPlugin, { JWTOptions } from "../../../plugins/jwt";
 import { IConfig } from "../../../config";
 
-const config = {
+const config: JWTOptions = {
     secret: Math.random().toString().substr(-16),
-    format: "base64"
-}
+    format: "base64",
+    ignoreUrls: ["/test"]
+};
 
 function getValidToken(): string {
     const jwtkey = JWTPlugin.getJwtKeyFromConfig(config);
@@ -48,9 +49,16 @@ describe("Should work as expected", () => {
                 expect(res.status).toBe(401);
                 done();
             })
-            .end((err) => {
-                if (err) throw err;
-            });
+            .end(() => {});
+    });
+    it("should return NOT FOUND when asking for /", (done) => {
+        request(this.app)
+            .get(config.ignoreUrls[0])
+            .expect((res) => {
+                expect(res.status).toBe(404);
+                done();
+            })
+            .end(() => {});
     });
     it("should return NOT AUTHORIZED when asking for /", (done) => {
         const token = getInvalidToken();
@@ -64,9 +72,7 @@ describe("Should work as expected", () => {
                 expect(res.status).toBe(401);
                 done();
             })
-            .end((err) => {
-                if (err) throw err;
-            });
+            .end(() => {});
     });
     it("should return NOT FOUND when asking for /", (done) => {
         const token = getValidToken();
@@ -80,9 +86,7 @@ describe("Should work as expected", () => {
                 expect(res.status).toBe(404);
                 done();
             })
-            .end((err) => {
-                if (err) throw err;
-            });
+            .end(() => {});
     });
 
 });

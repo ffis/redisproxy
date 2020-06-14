@@ -30,10 +30,7 @@ describe("should work without plugins", function () {
             expect(res.status).toBe(404);
             done();
         })
-            .end(function (err) {
-            if (err)
-                throw err;
-        });
+            .end(function () { });
     });
 });
 //# sourceMappingURL=empty.spec.js.map

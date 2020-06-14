@@ -2,8 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var util_1 = require("util");
 var ApiPlugin = /** @class */ (function () {
-    function ApiPlugin(config) {
-        this.config = config;
+    function ApiPlugin() {
     }
     ApiPlugin.prototype.ready = function () {
         return Promise.resolve();

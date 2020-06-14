@@ -2,9 +2,22 @@ import { resolve } from "path";
 
 import { App } from "..";
 
+import { ApiPluginDefinition } from "./api";
+import { CompressionPluginDefinition } from "./compression";
+import { CorsPluginDefinition } from "./cors";
+import { JWTPluginDefinition } from "./jwt";
+import { NotifyPluginDefinition } from "./notify";
+import { RealTimeProxyPluginDefinition } from "./realtimeproxy";
+import { RedisProxyPluginDefinition } from "./redisproxy";
+import { StaticPluginDefinition } from "./static";
+
+export type PluginWithParameters = [string, any];
+export type PluginDefinition = ApiPluginDefinition | CompressionPluginDefinition | CorsPluginDefinition | JWTPluginDefinition | NotifyPluginDefinition | RealTimeProxyPluginDefinition | RedisProxyPluginDefinition | StaticPluginDefinition | string | PluginWithParameters;
+
 export interface RestProxyPlugin {
     ready(): Promise<void>;
     register(app: App): Promise<void>;
+    unregister?: () => Promise<void>;
 }
 
 export function buildPlugins(config): RestProxyPlugin[] {

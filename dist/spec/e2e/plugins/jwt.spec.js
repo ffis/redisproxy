@@ -7,7 +7,8 @@ var jwt = require("jwt-simple");
 var jwt_1 = require("../../../plugins/jwt");
 var config = {
     secret: Math.random().toString().substr(-16),
-    format: "base64"
+    format: "base64",
+    ignoreUrls: ["/test"]
 };
 function getValidToken() {
     var jwtkey = jwt_1.default.getJwtKeyFromConfig(config);
@@ -43,10 +44,16 @@ describe("Should work as expected", function () {
             expect(res.status).toBe(401);
             done();
         })
-            .end(function (err) {
-            if (err)
-                throw err;
-        });
+            .end(function () { });
+    });
+    it("should return NOT FOUND when asking for /", function (done) {
+        request(_this.app)
+            .get(config.ignoreUrls[0])
+            .expect(function (res) {
+            expect(res.status).toBe(404);
+            done();
+        })
+            .end(function () { });
     });
     it("should return NOT AUTHORIZED when asking for /", function (done) {
         var token = getInvalidToken();
@@ -59,10 +66,7 @@ describe("Should work as expected", function () {
             expect(res.status).toBe(401);
             done();
         })
-            .end(function (err) {
-            if (err)
-                throw err;
-        });
+            .end(function () { });
     });
     it("should return NOT FOUND when asking for /", function (done) {
         var token = getValidToken();
@@ -75,10 +79,7 @@ describe("Should work as expected", function () {
             expect(res.status).toBe(404);
             done();
         })
-            .end(function (err) {
-            if (err)
-                throw err;
-        });
+            .end(function () { });
     });
 });
 //# sourceMappingURL=jwt.spec.js.map

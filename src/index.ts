@@ -17,6 +17,7 @@ export class App {
 	public app: Application;
 	public redisclient: RedisClient;
 	public server: Server;
+	public logger: Console;
 
 	private keys: (p: string) => Promise<string[]>;
 	private filter: any;
@@ -32,6 +33,7 @@ export class App {
 		this.app = express();
 
 		this.filter = new BloomFilter();
+		this.logger = console;
 		
 		this.redisclient = createClient(config.redis);
 		this.readyP = new Promise((resolve, reject) => {
@@ -69,6 +71,13 @@ export class App {
 		return Promise.all(this.plugins.map((p) => p.ready())).then(() => this.readyP);
 	}
 
+	public setServer() {
+		if (!this.config.server || !this.config.server.port || !this.config.server.bind) {
+			throw new Error("No valid config for server has been set");
+		}
+		this.server = getServer(this.config, this.app);
+	}
+
 	public register(): Promise<void> {
 
 		return this.ready().then(() => {
@@ -78,16 +87,35 @@ export class App {
 		});
 	}
 
-	public listen() {
-		if (!this.config.server || !this.config.server.port || !this.config.server.bind) {
-			throw new Error("No valid config for server has been set");
+	public listen(): Promise<void> {
+		if (!this.server) {
+			this.setServer();
 		}
-		this.server = getServer(this.config, this.app);
 
-		this.server.listen(this.config.server.port, this.config.server.bind, () => {
-			const protocol = this.config.server.https ? "https" : "http";
-			console.log("Listening on", protocol + "://" + this.config.server.bind + ":" + this.config.server.port);
+		return new Promise((resolve) => {
+			this.server.listen(this.config.server.port, this.config.server.bind, () => {
+				const protocol = this.config.server.https ? "https" : "http";
+				this.logger.log("Listening on", protocol + "://" + this.config.server.bind + ":" + this.config.server.port);
+
+				resolve();
+			});
 		});
+	}
+
+	public close(): Promise<void> {
+
+		return Promise.all(
+			this.plugins.filter((plugin) => typeof plugin.unregister !== "undefined").map((plugin) => plugin.unregister())
+		).then(() => {
+			if (this.server) {
+				return new Promise((resolve) => {
+					this.logger.log("Server closed");
+					this.server.close(resolve);
+				});
+			}
+
+			return Promise.resolve();
+		}).then(() => {});
 	}
 }
 
@@ -95,9 +123,8 @@ export function run() {
 	const config = JSON.parse(readFileSync(resolve(__dirname, "..", "config.json"), "utf-8"));
 
 	const app = new App(config);
-	app.register().then(() => {
-		app.listen();
-	}).catch((err) => {
+	app.setServer();
+	app.register().then(() => app.listen()).catch((err) => {
 		console.error(err);
 
 		throw err;

@@ -23,10 +23,7 @@ describe("Should work as expected", function () {
             expect(res.status).toBe(200);
             done();
         })
-            .end(function (err) {
-            if (err)
-                throw err;
-        });
+            .end(function () { });
     });
 });
 //# sourceMappingURL=static.spec.js.map

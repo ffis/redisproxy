@@ -4,6 +4,8 @@ import { parse } from "url";
 import { RestProxyPlugin } from ".";
 import { App } from "..";
 
+export type RedisProxyPluginDefinition = "redisproxy";
+
 function sendCb(res: Response) {
 	return function(err, val) {
 		if (err) {

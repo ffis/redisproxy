@@ -26,11 +26,9 @@ var JWTPlugin = /** @class */ (function () {
         var jwtKey = config.secret;
         switch (config.format) {
             case "hex":
-                jwtKey = Buffer.from(jwtKey, "hex");
-                break;
+                return Buffer.from(jwtKey, "hex");
             case "base64":
-                jwtKey = Buffer.from(jwtKey, "base64");
-                break;
+                return Buffer.from(jwtKey, "base64");
             default:
         }
         return jwtKey;

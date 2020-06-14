@@ -1,10 +1,8 @@
 import { ClientOpts } from "redis";
-
-export type PluginWithParameters = [string, any];
-export type PluginDefinition = string | PluginWithParameters;
+import { PluginDefinition } from "./plugins";
 
 export interface IConfig {
-	"redis"?: ClientOpts,
+	"redis"?: ClientOpts;
 	"server"?: {
 		"port": number;
 		"bind": string;
@@ -15,6 +13,6 @@ export interface IConfig {
 			"passphrase": string;
 		}
 	},
-	"debug"?: boolean,
+	"debug"?: boolean;
 	"restproxyplugins"?: PluginDefinition[];
 }

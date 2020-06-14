@@ -4,8 +4,10 @@ import { promisify } from "util";
 import { RestProxyPlugin } from ".";
 import { App } from "../";
 
+export type ApiPluginDefinition = "api";
+
 export default class ApiPlugin implements RestProxyPlugin {
-    constructor(private config: any){}
+    constructor(){}
 
     ready(): Promise<void> {
         return Promise.resolve();

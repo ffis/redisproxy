@@ -2,14 +2,14 @@ import request = require("supertest");
 import { readFileSync } from "fs";
 import { basename, resolve } from "path";
 import { App } from "../../..";
+import { IConfig } from "../../../config";
 
 const config = JSON.parse(readFileSync(resolve(__dirname, "..", "..", "..", "..", "config.json"), "utf-8"));
 
 describe("Should work as expected", () => {
     beforeEach(() => {
-        
         const directory = resolve(__dirname);
-        const configWithStaticPlugin = Object.assign({}, config, {restproxyplugins: [["static", {endpoint: "/", directory }]]});
+        const configWithStaticPlugin: IConfig = Object.assign({}, config, {restproxyplugins: [["static", {endpoint: "/", directory }]]});
         const app = new App(configWithStaticPlugin);
         return app.register().then(() => {
             this.app = app.app;
@@ -23,8 +23,6 @@ describe("Should work as expected", () => {
                 expect(res.status).toBe(200);
                 done();
             })
-            .end((err) => {
-                if (err) throw err;
-            });
+            .end(() => {});
     });
 });

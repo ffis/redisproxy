@@ -15,16 +15,18 @@ var RealTimeProxyPlugin = /** @class */ (function () {
         var _this = this;
         var sourceBuilder = function () {
             var redissub = redis_1.createClient(_this.config.redis);
-            return new redisbased_1.RedisRTEventsSource(redissub);
+            return new redisbased_1.RedisRTEventsSource(redissub, _this.config.redischannels);
         };
         var destBuilder = function () {
             var dest = new socketio_1.SocketIORTEventSubscriber();
             dest.listen(app.server);
             return dest;
         };
-        var rtep = new rtproxy_1.RealtimeEventsProxy(sourceBuilder, destBuilder);
-        rtep.run();
-        return Promise.resolve();
+        this.proxy = new rtproxy_1.RealtimeEventsProxy(sourceBuilder, destBuilder);
+        return this.proxy.run();
+    };
+    RealTimeProxyPlugin.prototype.unregister = function () {
+        return this.proxy.close();
     };
     return RealTimeProxyPlugin;
 }());

@@ -1,10 +1,11 @@
 {
   "name": "redisproxy",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "This is a simple redis proxy intented to server a jsonp access or an socket-io real time proxy",
   "main": "dist/index.js",
   "scripts": {
     "build": "npm run tsc",
+    "coverage": "node_modules/nyc/bin/nyc.js --require ts-node/register npm run test",
     "test": "node -r source-map-support/register ./node_modules/jasmine/bin/jasmine.js --config=./src/spec/support/jasmine.json",
     "tsc": "./node_modules/typescript/bin/tsc",
     "watch": "./node_modules/nodemon/bin/nodemon.js -w src --ext ts --exec 'npm run build && npm test'",
@@ -17,9 +18,11 @@
   "author": "Loksly",
   "license": "MIT",
   "dependencies": {
+    "@types/cors": "^2.8.6",
     "bloom.js": "^0.1.1",
     "cas": "0.0.3",
     "compression": "^1.7.4",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "jwt-simple": "^0.5.6",
     "portfinder": "^1.0.26",
@@ -28,16 +31,22 @@
     "tiny-json-http": "^7.2.0"
   },
   "devDependencies": {
+    "@istanbuljs/nyc-config-typescript": "^1.0.1",
+    "@types/compression": "^1.7.0",
     "@types/express": "^4.17.6",
     "@types/jasmine": "^3.5.10",
     "@types/node": "^14.0.13",
     "@types/redis": "^2.8.22",
     "@types/serve-static": "^1.13.4",
     "@types/socket.io": "^2.1.8",
+    "@types/socket.io-client": "^1.4.33",
     "jasmine": "^3.5.0",
     "nodemon": "^2.0.4",
+    "nyc": "^15.1.0",
+    "socket.io-client": "^2.3.0",
     "source-map-support": "^0.5.19",
     "supertest": "^4.0.2",
+    "ts-node": "^8.10.2",
     "typescript": "^3.9.5"
   }
 }

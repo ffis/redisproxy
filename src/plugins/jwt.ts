@@ -7,14 +7,18 @@ import { App } from "..";
 
 const supportedFormats = ["hex", "base64"];
 
+export interface JWTOptions {
+    secret: string;
+    ignoreUrls?: string[];
+    format?: "hex" | "base64";
+}
+
+export type JWTPluginDefinition = ["jwt", JWTOptions];
+
 export default class JWTPlugin implements RestProxyPlugin {
     private jwtKey: string | Buffer;
 
-    constructor(private config: {
-        secret: string;
-        ignoreUrls?: string[],
-        format?: "hex" | "base64",
-    }) {
+    constructor(private config: JWTOptions) {
         ok(typeof config === "object", "config must be set when using jwt plugin");
         ok(typeof config.secret === "string", "secret field must exist when using jwt plugin");
         if (config.ignoreUrls) {
@@ -34,16 +38,16 @@ export default class JWTPlugin implements RestProxyPlugin {
         this.jwtKey = JWTPlugin.getJwtKeyFromConfig(config);
     }
 
-    static getJwtKeyFromConfig(config: any): string|Buffer {
+    static getJwtKeyFromConfig(config: JWTOptions): string|Buffer {
         let jwtKey = config.secret;
 
         switch (config.format) {
             case "hex":
-                jwtKey = Buffer.from(jwtKey as string, "hex");
-                break;
+                return Buffer.from(jwtKey as string, "hex");
+
             case "base64":
-                jwtKey = Buffer.from(jwtKey as string, "base64");
-                break;
+                return Buffer.from(jwtKey as string, "base64");
+
             default:
         }
 

@@ -5,5 +5,5 @@ export interface RTEventsSource {
 }
 
 export interface RTEventsSubscriber {
-    publish(message: any): Promise<void>;
+    publish(channel: string, message: any): Promise<void>;
 }

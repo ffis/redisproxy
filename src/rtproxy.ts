@@ -27,7 +27,15 @@ export class RealtimeEventsProxy {
         return this.rtdest;
     }
 
-    public run() {
+    public run(): Promise<void> {
         this.source.pipe(this.subscriber);
+        
+        return this.source.subscribe();
+    }
+
+    public close(): Promise<void> {
+        this.source.unpipe(this.subscriber);
+
+        return Promise.resolve();
     }
 }

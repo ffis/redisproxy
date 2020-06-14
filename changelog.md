@@ -1,6 +1,19 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.2.0] - 2020-06-14
+
+### Added
+- Added _nyc_ to calculate code coverage (`npm run coverage`)
+- Added _cors_ plugin
+- Added _close_ method to `App`
+- Added _logger_ attribute to `App` so you may override `console.log` messages
+
+
+### Modified
+- _realtimeproxy_ proxy now supports listening to more than one channel at the same time.
+- `App.listen` now returns a promise that will be fulfilled when listening.
+
 ## [2.1.0] - 2020-06-11
 
 ### Added

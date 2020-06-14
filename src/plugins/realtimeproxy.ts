@@ -1,21 +1,32 @@
-import { RedisClient, createClient } from "redis";
+import { RedisClient, createClient, ClientOpts } from "redis";
 import { RedisRTEventsSource } from "../rtevent/sources/redisbased";
 import { SocketIORTEventSubscriber } from "../rtevent/subscribers/socketio";
 import { RealtimeEventsProxy } from "../rtproxy";
 import { App } from "..";
 import { RestProxyPlugin } from ".";
 
+export interface RealTimeProxyPluginOptions {
+    "redis"?: ClientOpts;
+    "redischannels": string[]
+}
+
+export type RealTimeProxyPluginDefinition = ["realtimeproxy", RealTimeProxyPluginOptions];
+
 export default class RealTimeProxyPlugin implements RestProxyPlugin {
-    constructor(private config) { }
+    private proxy: RealtimeEventsProxy;
+    constructor(private config: RealTimeProxyPluginOptions) {
+
+    }
 
     ready(): Promise<void> {
         return Promise.resolve();
     }
 
-    register(app: App): Promise<void> { 
+    register(app: App): Promise<void> {
         const sourceBuilder = () => {
             const redissub: RedisClient = createClient(this.config.redis);
-            return new RedisRTEventsSource(redissub);
+
+            return new RedisRTEventsSource(redissub, this.config.redischannels);
         }
 
         const destBuilder = () => {
@@ -25,9 +36,12 @@ export default class RealTimeProxyPlugin implements RestProxyPlugin {
             return dest;
         }
 
-        const rtep = new RealtimeEventsProxy(sourceBuilder, destBuilder);
-        rtep.run();
+        this.proxy = new RealtimeEventsProxy(sourceBuilder, destBuilder);
 
-        return Promise.resolve();
+        return this.proxy.run();
+    }
+
+    unregister(): Promise<void> {
+        return this.proxy.close();
     }
 }

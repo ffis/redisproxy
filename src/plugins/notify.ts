@@ -6,13 +6,17 @@ import * as tiny from "tiny-json-http";
 import { RestProxyPlugin } from ".";
 import { App } from "..";
 
+export interface NotifyPluginOptions {
+    url: string
+    MAX_CONTENT_LENGTH?: number;
+}
+
+export type NotifyPluginDefinition = ["notify", NotifyPluginOptions];
+
 export default class NotifyPlugin implements RestProxyPlugin {
     private MAX_CONTENT_LENGTH: number;
 
-    constructor(private config: {
-        url: string
-        MAX_CONTENT_LENGTH?: number;
-    }) {
+    constructor(private config: NotifyPluginOptions) {
         ok(typeof config === "object", "config must be set when using notify plugin");
         ok(typeof config.url === "string", "url attribute must be set when using notify plugin");
         ok(config.url.startsWith("http://") || config.url.startsWith("https://"), "url attribute must start with http:// or https:// when using notify plugin");

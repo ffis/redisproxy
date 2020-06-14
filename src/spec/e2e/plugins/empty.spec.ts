@@ -2,12 +2,13 @@ import request = require("supertest");
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { App } from "../../..";
+import { IConfig } from "../../../config";
 
 const config = JSON.parse(readFileSync(resolve(__dirname, "..", "..", "..", "..", "config.json"), "utf-8"));
 
 describe("Should work as expected", () => {
     it("should throw error when running without a proper configuration of plugins", () => {
-        const notValidConfig = Object.assign({}, config);
+        const notValidConfig: IConfig = Object.assign({}, config);
         Reflect.deleteProperty(notValidConfig, "restproxyplugins");
 
         expect(() => {
@@ -20,7 +21,7 @@ describe("Should work as expected", () => {
 
 describe("should work without plugins", () => {
     beforeEach(() => {
-        const configWithoutPlugins = Object.assign({}, config, {restproxyplugins: []});
+        const configWithoutPlugins: IConfig = Object.assign({}, config, {restproxyplugins: []});
         const app = new App(configWithoutPlugins);
         return app.register().then(() => {
             this.app = app.app;
@@ -33,8 +34,6 @@ describe("should work without plugins", () => {
                 expect(res.status).toBe(404);
                 done();
             })
-            .end((err) => {
-                if (err) throw err;
-            });
+            .end(() => {});
     });
 });

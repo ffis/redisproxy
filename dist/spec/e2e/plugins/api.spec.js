@@ -18,8 +18,8 @@ describe("Should work as expected", function () {
         var url = "/api";
         request(_this.app)
             .get(url)
-            .set('Accept', 'application/json')
-            .expect('Content-Type', /json/)
+            .set("Accept", "application/json")
+            .expect("Content-Type", /json/)
             .expect(function (res) {
             expect(res.status).toBe(200);
             var collection = res.body;
@@ -27,10 +27,7 @@ describe("Should work as expected", function () {
             expect(collection.length).toBeGreaterThan(0);
             done();
         })
-            .end(function (err) {
-            if (err)
-                throw err;
-        });
+            .end(function () { });
     });
 });
 //# sourceMappingURL=api.spec.js.map

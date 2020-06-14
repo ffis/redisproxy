@@ -18,6 +18,7 @@ var App = /** @class */ (function () {
         }
         this.app = express();
         this.filter = new BloomFilter();
+        this.logger = console;
         this.redisclient = redis_1.createClient(config.redis);
         this.readyP = new Promise(function (resolve, reject) {
             _this.redisclient.once("ready", function () {
@@ -48,6 +49,12 @@ var App = /** @class */ (function () {
         this.plugins = plugins_1.buildPlugins(this.config);
         return Promise.all(this.plugins.map(function (p) { return p.ready(); })).then(function () { return _this.readyP; });
     };
+    App.prototype.setServer = function () {
+        if (!this.config.server || !this.config.server.port || !this.config.server.bind) {
+            throw new Error("No valid config for server has been set");
+        }
+        this.server = utils_1.getServer(this.config, this.app);
+    };
     App.prototype.register = function () {
         var _this = this;
         return this.ready().then(function () {
@@ -58,14 +65,28 @@ var App = /** @class */ (function () {
     };
     App.prototype.listen = function () {
         var _this = this;
-        if (!this.config.server || !this.config.server.port || !this.config.server.bind) {
-            throw new Error("No valid config for server has been set");
+        if (!this.server) {
+            this.setServer();
         }
-        this.server = utils_1.getServer(this.config, this.app);
-        this.server.listen(this.config.server.port, this.config.server.bind, function () {
-            var protocol = _this.config.server.https ? "https" : "http";
-            console.log("Listening on", protocol + "://" + _this.config.server.bind + ":" + _this.config.server.port);
+        return new Promise(function (resolve) {
+            _this.server.listen(_this.config.server.port, _this.config.server.bind, function () {
+                var protocol = _this.config.server.https ? "https" : "http";
+                _this.logger.log("Listening on", protocol + "://" + _this.config.server.bind + ":" + _this.config.server.port);
+                resolve();
+            });
         });
+    };
+    App.prototype.close = function () {
+        var _this = this;
+        return Promise.all(this.plugins.filter(function (plugin) { return typeof plugin.unregister !== "undefined"; }).map(function (plugin) { return plugin.unregister(); })).then(function () {
+            if (_this.server) {
+                return new Promise(function (resolve) {
+                    _this.logger.log("Server closed");
+                    _this.server.close(resolve);
+                });
+            }
+            return Promise.resolve();
+        }).then(function () { });
     };
     return App;
 }());
@@ -73,9 +94,8 @@ exports.App = App;
 function run() {
     var config = JSON.parse(fs_1.readFileSync(path_1.resolve(__dirname, "..", "config.json"), "utf-8"));
     var app = new App(config);
-    app.register().then(function () {
-        app.listen();
-    }).catch(function (err) {
+    app.setServer();
+    app.register().then(function () { return app.listen(); }).catch(function (err) {
         console.error(err);
         throw err;
     });

@@ -20,15 +20,22 @@ Duplicate _config-example.json_ and rename to _config.json_ configure redis conn
 
 _Redisproxy_ is based on different plugins, you may need to activate in order to obtain the desired behavior.
 The in-built plugins are:
-- _api_: Adds and `/api` endpoint that lists what _keys_ are available on redis server. Use with caution and always with an authentication/authorization service like _jwt_.
+- _api_: Adds and `/api` endpoint that lists what _keys_ are available on redis server.
 - _compression_: Adds compression to all HTTP requests and responses.
-- _jwt_: Adds authentication verification via _Authorization_ header. It expects that starts with 'Bearer ' string. You may need to configure this plugin in order to work.
+- _cors_: Enables CORS to HTTP requests.\*
+- _jwt_: Adds authentication verification via _Authorization_ header. It expects that starts with 'Bearer ' string.\*
 - _notify_: Sends a notification via http to an HTTP/s server that the request has been made.
 - _realtimeproxy_: Proxies messages from a redis channel to sockets connected via _socket.io_.
 - _redisproxy_: Exposes redis content as readonly using _GET_ method.
-- _static_: Exposes a file directory. You may need to configure this plugin in order to work.
+- _static_: Exposes a file directory.\*
 
-Note some plugins like _static_ can be selected more than once.
+\*: You may need to configure this plugin in order to work.
+
+Note:
+- some plugins like _static_ can be selected more than once.
+- some plugins should be used with caution and always with an authentication/authorization service like _jwt_.
+
+
 
 ## Check Redis is working
 
@@ -45,4 +52,10 @@ Suppose the Redis server is configured on host 127.0.0.1, then run this script o
 
 ```bash
 npm start
+```
+
+## Run tests and calculate code coverage
+
+```bash
+npm run coverage
 ```

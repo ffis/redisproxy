@@ -1,33 +1,36 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RedisRTEventsSource = void 0;
+var util_1 = require("util");
+var console_1 = require("console");
 var RedisRTEventsSource = /** @class */ (function () {
-    function RedisRTEventsSource(redissubs) {
+    function RedisRTEventsSource(redissubs, channels) {
         this.redissubs = redissubs;
-        this.logger = console;
+        this.channels = channels;
         this.subscribers = [];
     }
     RedisRTEventsSource.prototype.subscribe = function () {
         var _this = this;
-        this.redissubs.subscribe("updates", function (evt) {
-            _this.logger.log(evt);
-        });
         this.redissubs.on("message", function (channel, data) {
-            _this.logger.log(channel, data);
+            var parsedData = data;
+            try {
+                parsedData = JSON.parse(data);
+            }
+            catch (err) { }
             _this.subscribers.forEach(function (sb) {
-                sb.publish(data);
+                sb.publish(channel, parsedData);
             });
         });
-        return Promise.resolve();
+        var subscribe = util_1.promisify(this.redissubs.subscribe).bind(this.redissubs);
+        return Promise.all(this.channels.map(function (channel) { return subscribe(channel); })).then(function () { });
     };
     RedisRTEventsSource.prototype.pipe = function (to) {
         this.subscribers.push(to);
     };
     RedisRTEventsSource.prototype.unpipe = function (who) {
         var idx = this.subscribers.indexOf(who);
-        if (idx >= 0) {
-            this.subscribers.splice(idx, 1);
-        }
+        console_1.assert(idx >= 0, "you cannot unpipe what is not already piped");
+        this.subscribers.splice(idx, 1);
     };
     return RedisRTEventsSource;
 }());

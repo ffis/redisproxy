@@ -8,28 +8,12 @@ export class SocketIORTEventSubscriber implements RTEventsSubscriber {
     public logger: Console = console; 
 
     listen(server: httpServer) {
+        this.clients = [];
         this.io = require("socket.io")(server);
-
-        this.io.on("connection", (client) => {
-            this.logger.log("Added client", this.clients.length);
-            client.on("event", (data) => {
-                this.logger.log(data);
-                this.clients.push(client);
-            });
-            client.on("disconnect", () => {
-                const index = this.clients.indexOf(client);
-                if (index > -1) {
-                    this.clients.splice(index, 1);
-                }
-                this.logger.log("removed client. Now we have", this.clients.length, "clients");
-            });
-        })
     }
 
-    publish(message): Promise<void> {
-        this.clients.forEach((socket) => {
-            socket.send(message);
-        });
+    publish(channel: string, message: string): Promise<void> {
+        this.io.emit(channel, message);
 
         return Promise.resolve();
     }

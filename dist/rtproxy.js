@@ -30,6 +30,11 @@ var RealtimeEventsProxy = /** @class */ (function () {
     });
     RealtimeEventsProxy.prototype.run = function () {
         this.source.pipe(this.subscriber);
+        return this.source.subscribe();
+    };
+    RealtimeEventsProxy.prototype.close = function () {
+        this.source.unpipe(this.subscriber);
+        return Promise.resolve();
     };
     return RealtimeEventsProxy;
 }());
