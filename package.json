@@ -1,6 +1,6 @@
 {
   "name": "redisproxy",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "This is a simple redis proxy intented to server a jsonp access or an socket-io real time proxy",
   "main": "dist/index.js",
   "scripts": {

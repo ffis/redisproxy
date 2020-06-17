@@ -2,16 +2,18 @@
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var request = require("supertest");
+var fs_1 = require("fs");
+var path_1 = require("path");
 var __1 = require("../../..");
 var jwt = require("jwt-simple");
 var jwt_1 = require("../../../plugins/jwt");
-var config = {
-    secret: Math.random().toString().substr(-16),
+var jwtconfig = {
+    secret: Math.random().toString().substr(-32),
     format: "base64",
     ignoreUrls: ["/test"]
 };
 function getValidToken() {
-    var jwtkey = jwt_1.default.getJwtKeyFromConfig(config);
+    var jwtkey = jwt_1.default.getJwtKeyFromConfig(jwtconfig);
     var validTokenContent = {
         user: "test",
         exp: (Date.now() / 1000) + 100
@@ -29,9 +31,10 @@ function getInvalidToken() {
     };
     return jwt.encode(validTokenContent, jwtkey);
 }
+var config = JSON.parse(fs_1.readFileSync(path_1.resolve(__dirname, "..", "..", "..", "..", "config.json"), "utf-8"));
 describe("Should work as expected", function () {
     beforeEach(function () {
-        var configWithJWTPlugin = { restproxyplugins: [["jwt", config]] };
+        var configWithJWTPlugin = Object.assign({}, config, { restproxyplugins: [["jwt", jwtconfig]] });
         var app = new __1.App(configWithJWTPlugin);
         return app.register().then(function () {
             _this.app = app.app;
@@ -48,7 +51,7 @@ describe("Should work as expected", function () {
     });
     it("should return NOT FOUND when asking for /", function (done) {
         request(_this.app)
-            .get(config.ignoreUrls[0])
+            .get(jwtconfig.ignoreUrls[0])
             .expect(function (res) {
             expect(res.status).toBe(404);
             done();

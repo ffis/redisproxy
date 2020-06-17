@@ -71,7 +71,7 @@ export class App {
 		return Promise.all(this.plugins.map((p) => p.ready())).then(() => this.readyP);
 	}
 
-	public setServer() {
+	public setServer(): void {
 		if (!this.config.server || !this.config.server.port || !this.config.server.bind) {
 			throw new Error("No valid config for server has been set");
 		}
@@ -110,7 +110,7 @@ export class App {
 			if (this.server) {
 				return new Promise((resolve) => {
 					this.logger.log("Server closed");
-					this.server.close(resolve);
+					this.server.close(() => { resolve(); });
 				});
 			}
 

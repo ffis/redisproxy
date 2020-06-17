@@ -1,18 +1,21 @@
 import request = require("supertest");
+import { readFileSync } from "fs";
+import { resolve } from "path";
+
 import { App } from "../../..";
 
 import * as jwt from "jwt-simple";
 import JWTPlugin, { JWTOptions } from "../../../plugins/jwt";
 import { IConfig } from "../../../config";
 
-const config: JWTOptions = {
-    secret: Math.random().toString().substr(-16),
+const jwtconfig: JWTOptions = {
+    secret: Math.random().toString().substr(-32),
     format: "base64",
     ignoreUrls: ["/test"]
 };
 
 function getValidToken(): string {
-    const jwtkey = JWTPlugin.getJwtKeyFromConfig(config);
+    const jwtkey = JWTPlugin.getJwtKeyFromConfig(jwtconfig);
     const validTokenContent = {
         user: "test",
         exp: (Date.now() / 1000) + 100
@@ -32,11 +35,14 @@ function getInvalidToken(): string {
     return jwt.encode(validTokenContent, jwtkey as string);
 }
 
+const config = JSON.parse(readFileSync(resolve(__dirname, "..", "..", "..", "..", "config.json"), "utf-8"));
+
 describe("Should work as expected", () => {
 
     beforeEach(() => {
-        const configWithJWTPlugin: IConfig = { restproxyplugins: [["jwt", config]] };
+        const configWithJWTPlugin: IConfig = Object.assign({}, config, { restproxyplugins: [["jwt", jwtconfig]] });
         const app = new App(configWithJWTPlugin);
+
         return app.register().then(() => {
             this.app = app.app;
         });
@@ -53,7 +59,7 @@ describe("Should work as expected", () => {
     });
     it("should return NOT FOUND when asking for /", (done) => {
         request(this.app)
-            .get(config.ignoreUrls[0])
+            .get(jwtconfig.ignoreUrls[0])
             .expect((res) => {
                 expect(res.status).toBe(404);
                 done();

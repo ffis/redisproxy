@@ -82,7 +82,7 @@ var App = /** @class */ (function () {
             if (_this.server) {
                 return new Promise(function (resolve) {
                     _this.logger.log("Server closed");
-                    _this.server.close(resolve);
+                    _this.server.close(function () { resolve(); });
                 });
             }
             return Promise.resolve();
