@@ -10,11 +10,10 @@ export function getServer(config: IConfig, app: Application): Server {
     let server;
 
     if (config.server.https) {
-        config.server.options.key = readFileSync(resolve(__dirname, "..", config.server.options.key), "utf-8");
-        config.server.options.cert = readFileSync(resolve(__dirname, "..", config.server.options.cert), "utf-8");
-        server = createServer(config.server.options, app);
-        Reflect.deleteProperty(config.server, 'options');
-
+        const options = Object.assign({}, config.server.options);
+        options.key = readFileSync(resolve(__dirname, "..", options.key), "utf-8");
+        options.cert = readFileSync(resolve(__dirname, "..", options.cert), "utf-8");
+        server = createServer(options, app);
     } else {
         server = require('http').createServer(app);
     }

@@ -7,7 +7,7 @@ var io = require("socket.io-client");
 var portfinder = require("portfinder");
 var __1 = require("../../..");
 var config = JSON.parse(fs_1.readFileSync(path_1.resolve(__dirname, "..", "..", "..", "..", "config.json"), "utf-8"));
-var redischannels = ["read", "updates", "creates"];
+var redischannels = ["read", "update", "create", "delete", "updates"];
 describe("Should work as expected", function () {
     beforeEach(function () {
         return portfinder.getPortPromise({ port: 9000 }).then(function (port) {

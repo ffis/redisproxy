@@ -7,7 +7,7 @@ import { App } from "../../..";
 import { IConfig } from "../../../config";
 
 const config: IConfig = JSON.parse(readFileSync(resolve(__dirname, "..", "..", "..", "..", "config.json"), "utf-8"));
-const redischannels = ["read", "updates", "creates"];
+const redischannels = ["read", "update", "create", "delete", "updates"];
 
 describe("Should work as expected", () => {
     beforeEach(() => {
