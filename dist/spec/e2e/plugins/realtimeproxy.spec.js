@@ -1,22 +1,25 @@
 "use strict";
-var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs_1 = require("fs");
 var path_1 = require("path");
 var io = require("socket.io-client");
 var portfinder = require("portfinder");
 var __1 = require("../../..");
+var dabase_mock_1 = require("../../dabase.mock");
+var redis_1 = require("redis");
 var config = JSON.parse(fs_1.readFileSync(path_1.resolve(__dirname, "..", "..", "..", "..", "config.json"), "utf-8"));
 var redischannels = ["read", "update", "create", "delete", "updates"];
 describe("Should work as expected", function () {
     beforeEach(function () {
+        var _this = this;
         return portfinder.getPortPromise({ port: 9000 }).then(function (port) {
             var configWithRTPlugin = Object.assign({}, config, { restproxyplugins: [["realtimeproxy", { redischannels: redischannels, redis: config.redis }]] });
+            _this.redispub = redis_1.createClient(configWithRTPlugin.redis);
             configWithRTPlugin.server.https = false;
             configWithRTPlugin.server.port = port;
             configWithRTPlugin.server.bind = "localhost";
             _this.url = "http://localhost:" + port;
-            var app = new __1.App(configWithRTPlugin);
+            var app = new __1.App(configWithRTPlugin, new dabase_mock_1.MockedDatabase());
             app.logger = Object.assign({}, console, { log: function () { } });
             app.setServer();
             return app.register().then(function () {
@@ -26,12 +29,13 @@ describe("Should work as expected", function () {
         });
     });
     afterEach(function () {
-        var app = _this.app;
+        var app = this.app;
         return app.close();
     });
     it("should proxy a text notification received from redis to socket.io", function (done) {
-        var app = _this.app;
-        var socket = io(_this.url, { autoConnect: false, reconnection: false, rejectUnauthorized: false });
+        var _this = this;
+        var app = this.app;
+        var socket = io(this.url, { autoConnect: false, reconnection: false, rejectUnauthorized: false });
         var myMessage = "my message";
         var received = redischannels.map(function () { return false; });
         socket.once("disconnect", function () {
@@ -56,14 +60,15 @@ describe("Should work as expected", function () {
         });
         socket.on("connect", function () {
             redischannels.forEach(function (channel) {
-                app.redisclient.publish(channel, myMessage);
+                _this.redispub.publish(channel, myMessage);
             });
         });
         socket.connect();
     });
     it("should proxy an object notification received from redis to socket.io", function (done) {
-        var app = _this.app;
-        var socket = io(_this.url, { autoConnect: false, reconnection: false, rejectUnauthorized: false });
+        var _this = this;
+        var app = this.app;
+        var socket = io(this.url, { autoConnect: false, reconnection: false, rejectUnauthorized: false });
         var myMessage = { type: "message", content: "my message" };
         var received = redischannels.map(function () { return false; });
         socket.once("disconnect", function () {
@@ -88,7 +93,7 @@ describe("Should work as expected", function () {
         });
         socket.on("connect", function () {
             redischannels.forEach(function (channel) {
-                app.redisclient.publish(channel, JSON.stringify(myMessage));
+                _this.redispub.publish(channel, JSON.stringify(myMessage));
             });
         });
         socket.connect();

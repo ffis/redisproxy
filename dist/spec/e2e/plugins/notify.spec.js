@@ -1,5 +1,4 @@
 "use strict";
-var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var request = require("supertest");
 var fs_1 = require("fs");
@@ -7,15 +6,17 @@ var path_1 = require("path");
 var http_1 = require("http");
 var __1 = require("../../..");
 var portfinder = require("portfinder");
+var dabase_mock_1 = require("../../dabase.mock");
 var config = JSON.parse(fs_1.readFileSync(path_1.resolve(__dirname, "..", "..", "..", "..", "config.json"), "utf-8"));
 describe("Should work as expected", function () {
     beforeEach(function () {
+        var _this = this;
         return portfinder.getPortPromise().then(function (port) {
             var url = "http://localhost:" + port;
             _this.port = port;
             var options = { url: url, MAX_CONTENT_LENGTH: 2 };
             var configWithNotifyPlugin = Object.assign({}, config, { restproxyplugins: [["notify", options]] });
-            var app = new __1.App(configWithNotifyPlugin);
+            var app = new __1.App(configWithNotifyPlugin, new dabase_mock_1.MockedDatabase());
             return app.register().then(function () {
                 _this.app = app.app;
             });
@@ -28,9 +29,9 @@ describe("Should work as expected", function () {
             expect(req.method).toBe("POST");
             server.close();
             done();
-        }).listen(_this.port);
+        }).listen(this.port);
         var url = "/";
-        request(_this.app)
+        request(this.app)
             .get(url)
             .end(function () { });
     });
@@ -41,9 +42,9 @@ describe("Should work as expected", function () {
             expect(req.method).toBe("POST");
             server.close();
             done();
-        }).listen(_this.port);
+        }).listen(this.port);
         var url = "/";
-        request(_this.app)
+        request(this.app)
             .post(url)
             .send({ "close": "example" })
             .end(function () { });

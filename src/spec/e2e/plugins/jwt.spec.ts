@@ -1,4 +1,5 @@
 import request = require("supertest");
+import { Application } from "express";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 
@@ -7,6 +8,12 @@ import { App } from "../../..";
 import * as jwt from "jwt-simple";
 import JWTPlugin, { JWTOptions } from "../../../plugins/jwt";
 import { IConfig } from "../../../config";
+import { MockedDatabase } from "../../dabase.mock";
+
+interface ThisSpecInstance {
+    app: Application;
+    port: number;
+}
 
 const jwtconfig: JWTOptions = {
     secret: Math.random().toString().substr(-32),
@@ -39,16 +46,16 @@ const config = JSON.parse(readFileSync(resolve(__dirname, "..", "..", "..", ".."
 
 describe("Should work as expected", () => {
 
-    beforeEach(() => {
+    beforeEach(function(this: ThisSpecInstance) {
         const configWithJWTPlugin: IConfig = Object.assign({}, config, { restproxyplugins: [["jwt", jwtconfig]] });
-        const app = new App(configWithJWTPlugin);
+        const app = new App(configWithJWTPlugin, new MockedDatabase());
 
         return app.register().then(() => {
             this.app = app.app;
         });
     });
 
-    it("should return NOT AUTHORIZED when asking for /", (done) => {
+    it("should return NOT AUTHORIZED when asking for /", function(this: ThisSpecInstance, done: DoneFn) {
         request(this.app)
             .get("/")
             .expect((res) => {
@@ -57,7 +64,7 @@ describe("Should work as expected", () => {
             })
             .end(() => {});
     });
-    it("should return NOT FOUND when asking for /", (done) => {
+    it("should return NOT FOUND when asking for /", function(this: ThisSpecInstance, done: DoneFn) {
         request(this.app)
             .get(jwtconfig.ignoreUrls[0])
             .expect((res) => {
@@ -66,7 +73,7 @@ describe("Should work as expected", () => {
             })
             .end(() => {});
     });
-    it("should return NOT AUTHORIZED when asking for /", (done) => {
+    it("should return NOT AUTHORIZED when asking for /", function(this: ThisSpecInstance, done: DoneFn) {
         const token = getInvalidToken();
 
         const url = "/";
@@ -80,7 +87,7 @@ describe("Should work as expected", () => {
             })
             .end(() => {});
     });
-    it("should return NOT FOUND when asking for /", (done) => {
+    it("should return NOT FOUND when asking for /", function(this: ThisSpecInstance, done: DoneFn) {
         const token = getValidToken();
 
         const url = "/";

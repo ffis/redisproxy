@@ -1,46 +1,27 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var url_1 = require("url");
-function sendCb(res) {
-    return function (err, val) {
-        if (err) {
-            res.status(500).jsonp('Error!');
-        }
-        else if (val) {
-            if (typeof val === 'string') {
-                try {
-                    var obj = JSON.parse(val);
-                    res.jsonp(obj);
-                }
-                catch (e) {
-                    res.jsonp(val);
-                }
-            }
-            else {
-                res.jsonp(val);
-            }
-        }
-        else {
-            res.status(404).jsonp('Not found!');
-        }
-    };
-}
+var utils_1 = require("./utils");
 var RedisProxyPlugin = /** @class */ (function () {
     function RedisProxyPlugin() {
     }
+    RedisProxyPlugin.prototype.parse = function () {
+        return JSON.parse;
+    };
     RedisProxyPlugin.prototype.ready = function () {
         return Promise.resolve();
     };
     RedisProxyPlugin.prototype.register = function (app) {
+        var _this = this;
         app.app.get("*", function (req, res, next) {
             var key = url_1.parse(req.url).pathname;
             if (app.isValid(key)) {
-                app.redisclient.get(key, sendCb(res));
+                _this.sendData2Output(app, key, res);
             }
             else {
                 app.refresh().then(function () {
                     if (app.isValid(key)) {
-                        app.redisclient.get(key, sendCb(res));
+                        _this.sendData2Output(app, key, res);
                     }
                     else {
                         next();
@@ -49,6 +30,14 @@ var RedisProxyPlugin = /** @class */ (function () {
             }
         });
         return Promise.resolve();
+    };
+    RedisProxyPlugin.prototype.sendData2Output = function (app, key, res) {
+        var _this = this;
+        app.database.get(key).then(function (value) {
+            utils_1.sendCb(res, _this.parse)(null, value);
+        }).catch(function (err) {
+            utils_1.sendCb(res, _this.parse)(err);
+        });
     };
     return RedisProxyPlugin;
 }());

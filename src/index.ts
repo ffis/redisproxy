@@ -12,19 +12,20 @@ import { Server } from "http";
 import { IConfig } from "./config";
 
 import * as BloomFilter from "bloom.js";
+import { RedisDatabase } from "./database/redis";
+import { Database } from "./database";
 
 export class App {
 	public app: Application;
-	public redisclient: RedisClient;
+	// public redisclient: RedisClient;
 	public server: Server;
 	public logger: Console;
 
-	private keys: (p: string) => Promise<string[]>;
 	private filter: any;
 	private readyP: Promise<void>;
 	private plugins: RestProxyPlugin[];
 
-	constructor(private config: IConfig) {
+	constructor(private config: IConfig, public database: Database) {
 
 		if (!config.restproxyplugins) {
 			throw new Error("You need to enable at least one plugin. Try editing config.json file and add plugin: [\"redisproxy\"]");
@@ -35,19 +36,7 @@ export class App {
 		this.filter = new BloomFilter();
 		this.logger = console;
 		
-		this.redisclient = createClient(config.redis);
-		this.readyP = new Promise((resolve, reject) => {
-			this.redisclient.once("ready", () => {
-				resolve();
-				this.refresh();
-			});
-
-			this.redisclient.once("error", () => {
-				reject();
-			});
-
-			this.keys = promisify(this.redisclient.keys).bind(this.redisclient);
-		});
+		this.readyP = this.database.ready().then(() => { this.refresh(); });
 	}
 
 	public isValid(key: string): boolean {
@@ -55,7 +44,7 @@ export class App {
 	}
 
 	public refresh(): Promise<string[]> {
-		return this.keys("*").then((vals) => {
+		return this.database.keys("*").then((vals) => {
 			this.filter = new BloomFilter();
 			vals.forEach((value) => {
 				this.filter.add(value);
@@ -121,8 +110,9 @@ export class App {
 
 export function run() {
 	const config = JSON.parse(readFileSync(resolve(__dirname, "..", "config.json"), "utf-8"));
+	const db = new RedisDatabase(config.redis);
 
-	const app = new App(config);
+	const app = new App(config, db);
 	app.setServer();
 	app.register().then(() => app.listen()).catch((err) => {
 		console.error(err);

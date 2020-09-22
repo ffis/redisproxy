@@ -2,9 +2,12 @@ import { resolve } from "path";
 
 import { App } from "..";
 
+export type parseFunction = (s: string) => any;
+
 import { ApiPluginDefinition } from "./api";
 import { CompressionPluginDefinition } from "./compression";
 import { CorsPluginDefinition } from "./cors";
+import { DecryptPluginDefinition } from "./decrypt";
 import { JWTPluginDefinition } from "./jwt";
 import { NotifyPluginDefinition } from "./notify";
 import { RealTimeProxyPluginDefinition } from "./realtimeproxy";
@@ -12,7 +15,7 @@ import { RedisProxyPluginDefinition } from "./redisproxy";
 import { StaticPluginDefinition } from "./static";
 
 export type PluginWithParameters = [string, any];
-export type PluginDefinition = ApiPluginDefinition | CompressionPluginDefinition | CorsPluginDefinition | JWTPluginDefinition | NotifyPluginDefinition | RealTimeProxyPluginDefinition | RedisProxyPluginDefinition | StaticPluginDefinition | string | PluginWithParameters;
+export type PluginDefinition = ApiPluginDefinition | CompressionPluginDefinition | CorsPluginDefinition | DecryptPluginDefinition | JWTPluginDefinition | NotifyPluginDefinition | RealTimeProxyPluginDefinition | RedisProxyPluginDefinition | StaticPluginDefinition | string | PluginWithParameters;
 
 export interface RestProxyPlugin {
     ready(): Promise<void>;

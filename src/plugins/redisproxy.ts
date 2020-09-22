@@ -1,34 +1,18 @@
 import { Request, Response, NextFunction } from "express";
 import { parse } from "url";
 
-import { RestProxyPlugin } from ".";
+import { parseFunction, RestProxyPlugin } from ".";
 import { App } from "..";
+import { sendCb } from "./utils";
 
 export type RedisProxyPluginDefinition = "redisproxy";
 
-function sendCb(res: Response) {
-	return function(err, val) {
-		if (err) {
-			res.status(500).jsonp('Error!');
-		} else if (val) {
-			if (typeof val === 'string') {
-				try {
-					const obj = JSON.parse(val);
-					res.jsonp(obj);
-				} catch (e) {
-					res.jsonp(val);
-				}
-			} else {
-				res.jsonp(val);
-			}
-		} else {
-			res.status(404).jsonp('Not found!');
-		}
-	};
-}
-
 export default class RedisProxyPlugin implements RestProxyPlugin {
     constructor() { }
+
+    parse(): parseFunction {
+        return JSON.parse;
+    }
 
     ready(): Promise<void> {
         return Promise.resolve();
@@ -39,11 +23,11 @@ export default class RedisProxyPlugin implements RestProxyPlugin {
             const key = parse(req.url).pathname;
         
             if (app.isValid(key)) {
-                app.redisclient.get(key, sendCb(res));
+                this.sendData2Output(app, key, res);
             } else {
                 app.refresh().then(() => {
                     if (app.isValid(key)) {
-                        app.redisclient.get(key, sendCb(res));
+                        this.sendData2Output(app, key, res);
                     } else {
                         next();
                     }
@@ -52,5 +36,13 @@ export default class RedisProxyPlugin implements RestProxyPlugin {
         });
 
         return Promise.resolve();
+    }
+
+    private sendData2Output(app: App, key: string, res: Response): void {
+        app.database.get(key).then((value) => {
+            sendCb(res, this.parse)(null, value);
+        }).catch((err) => {
+            sendCb(res, this.parse)(err);
+        });
     }
 }

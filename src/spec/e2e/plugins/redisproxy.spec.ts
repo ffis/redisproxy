@@ -3,19 +3,24 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 import { App } from "../../..";
 import { IConfig } from "../../../config";
+import { MockedDatabase } from "../../dabase.mock";
 
 const config = JSON.parse(readFileSync(resolve(__dirname, "..", "..", "..", "..", "config.json"), "utf-8"));
 
+interface ThisSpecInstance {
+    app: App;
+}
+
 describe("Should work as expected", () => {
-    beforeEach(() => {
+    beforeEach(function(this: ThisSpecInstance) {
         const configWithRPlugin: IConfig = Object.assign({}, config, {restproxyplugins: ["redisproxy"]});
-        const app = new App(configWithRPlugin);
+        const app = new App(configWithRPlugin, new MockedDatabase());
         app.setServer();
         return app.register().then(() => {
             this.app = app;
         });
     });
-    it("should return ok when asking for a valid content", (done) => {
+    it("should return ok when asking for a valid content", function(this: ThisSpecInstance, done: DoneFn) {
         this.app.refresh().then((urls) => {
             const validurls = urls.filter((u) => u.startsWith("/"));
 
@@ -38,7 +43,7 @@ describe("Should work as expected", () => {
             done();
         });
     });
-    it("should return NOT FOUND when asking for no valid content", (done) => {
+    it("should return NOT FOUND when asking for no valid content", function(this: ThisSpecInstance, done: DoneFn) {
         this.app.refresh().then(() => {
             const notvalidurl = "/veryrandomtextveryrandomtext";
 

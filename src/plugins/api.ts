@@ -14,10 +14,8 @@ export default class ApiPlugin implements RestProxyPlugin {
     }
 
     register(app: App): Promise<void> {
-        const keys = promisify(app.redisclient.keys).bind(app.redisclient);
-
         app.app.get("/api", (req: Request, res: Response) => {
-            keys("*").then((keys) => {
+            app.database.keys("*").then((keys) => {
                 res.jsonp(keys);
             }).catch((err) => {
                 console.error(err);
