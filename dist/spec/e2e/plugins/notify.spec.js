@@ -6,7 +6,7 @@ var path_1 = require("path");
 var http_1 = require("http");
 var __1 = require("../../..");
 var portfinder = require("portfinder");
-var dabase_mock_1 = require("../../dabase.mock");
+var database_mock_1 = require("../../database.mock");
 var config = JSON.parse(fs_1.readFileSync(path_1.resolve(__dirname, "..", "..", "..", "..", "config.json"), "utf-8"));
 describe("Should work as expected", function () {
     beforeEach(function () {
@@ -16,7 +16,7 @@ describe("Should work as expected", function () {
             _this.port = port;
             var options = { url: url, MAX_CONTENT_LENGTH: 2 };
             var configWithNotifyPlugin = Object.assign({}, config, { restproxyplugins: [["notify", options]] });
-            var app = new __1.App(configWithNotifyPlugin, new dabase_mock_1.MockedDatabase());
+            var app = new __1.App(configWithNotifyPlugin, new database_mock_1.MockedDatabase());
             return app.register().then(function () {
                 _this.app = app.app;
             });

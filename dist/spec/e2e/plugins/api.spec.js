@@ -4,13 +4,13 @@ var request = require("supertest");
 var fs_1 = require("fs");
 var path_1 = require("path");
 var __1 = require("../../..");
-var dabase_mock_1 = require("../../dabase.mock");
+var database_mock_1 = require("../../database.mock");
 var config = JSON.parse(fs_1.readFileSync(path_1.resolve(__dirname, "..", "..", "..", "..", "config.json"), "utf-8"));
 describe("Should work as expected", function () {
     beforeEach(function () {
         var _this = this;
         var configWithApiPlugin = Object.assign({}, config, { restproxyplugins: ["api"] });
-        var app = new __1.App(configWithApiPlugin, new dabase_mock_1.MockedDatabase());
+        var app = new __1.App(configWithApiPlugin, new database_mock_1.MockedDatabase());
         return app.register().then(function () {
             _this.app = app.app;
         });

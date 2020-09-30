@@ -4,7 +4,7 @@ import { basename, resolve } from "path";
 import { Application } from "express";
 import { App } from "../../..";
 import { IConfig } from "../../../config";
-import { MockedDatabase } from "../../dabase.mock";
+import { MockedDatabase } from "../../database.mock";
 
 const config = JSON.parse(readFileSync(resolve(__dirname, "..", "..", "..", "..", "config.json"), "utf-8"));
 
@@ -24,15 +24,11 @@ describe("Should work as expected", function(this: ThisSpecInstance) {
         });
     });
 
-    it("should return ok when asking for /" + basename(__filename),  function(this: ThisSpecInstance, done: DoneFn) {
+    it("should return ok when asking for /" + basename(__filename),  function(this: ThisSpecInstance) {
         const url = "/" + basename(__filename);
 
-        request(this.app)
+        return request(this.app)
             .get(url)
-            .expect((res) => {
-                expect(res.status).toBe(200);
-                done();
-            })
-            .end(() => {});
+            .expect(200);
     });
 });

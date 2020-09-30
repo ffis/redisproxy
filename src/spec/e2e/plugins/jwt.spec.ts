@@ -8,7 +8,7 @@ import { App } from "../../..";
 import * as jwt from "jwt-simple";
 import JWTPlugin, { JWTOptions } from "../../../plugins/jwt";
 import { IConfig } from "../../../config";
-import { MockedDatabase } from "../../dabase.mock";
+import { MockedDatabase } from "../../database.mock";
 
 interface ThisSpecInstance {
     app: Application;

@@ -5,7 +5,7 @@ import * as portfinder from "portfinder";
 
 import { App } from "../../..";
 import { IConfig } from "../../../config";
-import { MockedDatabase } from "../../dabase.mock";
+import { MockedDatabase } from "../../database.mock";
 import { createClient, RedisClient } from "redis";
 
 const config: IConfig = JSON.parse(readFileSync(resolve(__dirname, "..", "..", "..", "..", "config.json"), "utf-8"));

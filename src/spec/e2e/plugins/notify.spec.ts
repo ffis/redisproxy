@@ -8,7 +8,7 @@ import { App } from "../../..";
 import * as portfinder from "portfinder";
 import { IConfig } from "../../../config";
 import { NotifyPluginOptions } from "../../../plugins/notify";
-import { MockedDatabase } from "../../dabase.mock";
+import { MockedDatabase } from "../../database.mock";
 
 const config = JSON.parse(readFileSync(resolve(__dirname, "..", "..", "..", "..", "config.json"), "utf-8"));
 

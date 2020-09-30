@@ -4,7 +4,7 @@ var request = require("supertest");
 var fs_1 = require("fs");
 var path_1 = require("path");
 var __1 = require("../../..");
-var dabase_mock_1 = require("../../dabase.mock");
+var database_mock_1 = require("../../database.mock");
 var config = JSON.parse(fs_1.readFileSync(path_1.resolve(__dirname, "..", "..", "..", "..", "config.json"), "utf-8"));
 var fakeServer = "https://example.com";
 describe("Should work as expected", function () {
@@ -14,7 +14,7 @@ describe("Should work as expected", function () {
             origin: [fakeServer]
         };
         var configWithCorsPlugin = Object.assign({}, config, { restproxyplugins: [["cors", options]] });
-        var app = new __1.App(configWithCorsPlugin, new dabase_mock_1.MockedDatabase());
+        var app = new __1.App(configWithCorsPlugin, new database_mock_1.MockedDatabase());
         return app.register().then(function () {
             _this.app = app.app;
         });

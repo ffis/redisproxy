@@ -4,7 +4,7 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 import { App } from "../../..";
 import { IConfig } from "../../../config";
-import { MockedDatabase } from "../../dabase.mock";
+import { MockedDatabase } from "../../database.mock";
 
 interface ThisSpecInstance {
     app: Application;

@@ -19,4 +19,4 @@ var MockedDatabase = /** @class */ (function () {
     return MockedDatabase;
 }());
 exports.MockedDatabase = MockedDatabase;
-//# sourceMappingURL=dabase.mock.js.map
+//# sourceMappingURL=database.mock.js.map

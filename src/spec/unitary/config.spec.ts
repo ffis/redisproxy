@@ -1,6 +1,6 @@
 import { App } from "../..";
 import { IConfig } from "../../config";
-import { MockedDatabase } from "../dabase.mock";
+import { MockedDatabase } from "../database.mock";
 
 describe("Config behavoir", () => {
     it("Should fail when no valid config is set", () => {

@@ -6,7 +6,7 @@ import { CorsOptions } from "cors";
 
 import { App } from "../../..";
 import { IConfig } from "../../../config";
-import { MockedDatabase } from "../../dabase.mock";
+import { MockedDatabase } from "../../database.mock";
 
 interface ThisSpecInstance {
     app: Application;

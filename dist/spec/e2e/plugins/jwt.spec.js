@@ -6,7 +6,7 @@ var path_1 = require("path");
 var __1 = require("../../..");
 var jwt = require("jwt-simple");
 var jwt_1 = require("../../../plugins/jwt");
-var dabase_mock_1 = require("../../dabase.mock");
+var database_mock_1 = require("../../database.mock");
 var jwtconfig = {
     secret: Math.random().toString().substr(-32),
     format: "base64",
@@ -36,7 +36,7 @@ describe("Should work as expected", function () {
     beforeEach(function () {
         var _this = this;
         var configWithJWTPlugin = Object.assign({}, config, { restproxyplugins: [["jwt", jwtconfig]] });
-        var app = new __1.App(configWithJWTPlugin, new dabase_mock_1.MockedDatabase());
+        var app = new __1.App(configWithJWTPlugin, new database_mock_1.MockedDatabase());
         return app.register().then(function () {
             _this.app = app.app;
         });
