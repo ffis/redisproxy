@@ -9,12 +9,12 @@ export function sendCb(res: Response, parseFn: parseFunction) {
 			if (typeof val === 'string') {
 				try {
 					const obj = parseFn(val);
-					res.jsonp(obj);
+					res.status(200).jsonp(obj);
 				} catch (e) {
-					res.jsonp(val);
+					res.status(200).jsonp(val);
 				}
 			} else {
-				res.jsonp(val);
+				res.status(200).jsonp(val);
 			}
 		} else {
 			res.status(404).jsonp('Not found!');

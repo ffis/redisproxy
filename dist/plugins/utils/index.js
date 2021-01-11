@@ -10,14 +10,14 @@ function sendCb(res, parseFn) {
             if (typeof val === 'string') {
                 try {
                     var obj = parseFn(val);
-                    res.jsonp(obj);
+                    res.status(200).jsonp(obj);
                 }
                 catch (e) {
-                    res.jsonp(val);
+                    res.status(200).jsonp(val);
                 }
             }
             else {
-                res.jsonp(val);
+                res.status(200).jsonp(val);
             }
         }
         else {
